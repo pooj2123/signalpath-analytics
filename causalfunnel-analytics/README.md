@@ -1,73 +1,181 @@
-# SignalPath — User Analytics Application
+# SignalPath — User Behavior Analytics Platform
 
-A compact, full-stack user-behavior analytics application built for the CausalFunnel Full Stack Engineer assignment. It captures page views and clicks, groups events by browser session, exposes a small REST API, and displays session journeys and a click heatmap.
+A full-stack web analytics application for tracking browser activity, exploring user journeys, and visualizing click behavior.
 
-## Tech stack
-- **Dashboard + demo site:** React, Vite, TypeScript, plain CSS
-- **API:** Node.js, Express
-- **Database:** MongoDB with Mongoose
-- **Tracking:** Vanilla JavaScript snippet (`public/tracker.js`)
-- **Validation/security:** Helmet, CORS allow-list, express-rate-limit, input validation, request-size limits
+**[Live Dashboard](https://signalpath-analytics.vercel.app/)** · **[API Health](https://signalpath-api.onrender.com/api/health)** · **[GitHub Repository](https://github.com/pooj2123/signalpath-analytics)**
 
-The implementation intentionally uses straightforward code and small modules so the data flow is easy to explain during evaluation.
+## Overview
+
+SignalPath is a full-stack user-behavior analytics application developed for the CausalFunnel Full Stack Engineer assignment.
+
+It captures browser page views and clicks, groups activity into sessions, stores validated events in MongoDB, and displays session journeys and click-position visualizations through an interactive dashboard.
+
+The project demonstrates browser-side event tracking, REST API development, database persistence, analytics queries, and cloud deployment.
+
+## Live Demo
+
+- **Dashboard:** https://signalpath-analytics.vercel.app/
+- **Backend API:** https://signalpath-api.onrender.com/
+- **API health endpoint:** https://signalpath-api.onrender.com/api/health
+- **Source code:** https://github.com/pooj2123/signalpath-analytics
+
+Open the dashboard and launch the demo storefront. Interact with the demo page to generate events, then return to the dashboard to explore sessions and click data.
 
 ## Features
-- `page_view` and `click` tracking with `session_id`, page URL, timestamp, and click coordinates.
-- Session ID stored in `localStorage`, with a cookie fallback.
-- Batch event ingestion with validation and MongoDB persistence.
-- Sessions list with total event count, first/last activity, and page count.
-- Ordered user journey for a selected session.
-- Page selector and click-position overlay for the heatmap.
-- Demo storefront that generates real events.
-- Seed/demo events can be created by using the demo site; no fake analytics are inserted automatically.
-- Responsive layout, loading/error/empty states, and API health endpoint.
 
-## Requirements
-- Node.js 20+
-- MongoDB 6+ (local MongoDB or MongoDB Atlas)
-- npm
+- **Browser event tracking:** Captures `page_view` and `click` events with session IDs, page URLs, timestamps, and click coordinates.
+- **Session identification:** Uses browser `localStorage`, with a cookie fallback.
+- **Event ingestion:** Accepts individual events and batches with input validation.
+- **Session analytics:** Displays event counts, first and last activity, and page counts.
+- **User journey exploration:** Presents events chronologically for a selected session.
+- **Click heatmap:** Visualizes recorded click positions for selected pages.
+- **Interactive demo storefront:** Generates real events through browser interactions.
+- **Persistent storage:** Stores event data in MongoDB through Mongoose.
+- **API health endpoint:** Reports API and database connectivity.
+- **Security controls:** Uses Helmet, CORS origin restrictions, rate limiting, request-size limits, and input validation.
+- **Responsive dashboard:** Includes loading, error, and empty states.
 
-## Run locally
+## Technology Stack
 
-### 1. Configure the API
-```bash
-cd server
-cp .env.example .env
+| Layer | Technologies |
+|---|---|
+| Frontend | React, Vite, TypeScript, CSS |
+| Backend | Node.js, Express.js |
+| Database | MongoDB Atlas, Mongoose |
+| Event tracking | Vanilla JavaScript |
+| Security | Helmet, CORS, express-rate-limit |
+| Frontend deployment | Vercel |
+| Backend deployment | Render |
+
+## System Architecture
+
+```text
+Browser / Demo Storefront
+          |
+          v
+    JavaScript Tracker
+          |
+          | Page views and clicks
+          v
+    Express REST API
+        (Render)
+          |
+          | Validation and persistence
+          v
+      MongoDB Atlas
+          |
+          | Session and event queries
+          v
+   React Analytics Dashboard
+        (Vercel)
 ```
-Edit `server/.env` and set `MONGODB_URI`. For local MongoDB, the default example URI is suitable if MongoDB is running locally.
 
-### 2. Install and start the API
+### Data Flow
+
+1. A visitor opens the demo storefront.
+2. The tracking script records page views and click interactions.
+3. Events are sent to the Express API.
+4. The API validates incoming data and stores accepted events in MongoDB.
+5. The dashboard retrieves session summaries, event journeys, and click data.
+6. The interface visualizes the collected activity.
+
+## Deployment
+
+| Component | Platform | Link |
+|---|---|---|
+| Frontend dashboard | Vercel | [Open dashboard](https://signalpath-analytics.vercel.app/) |
+| Backend API | Render | [Open backend](https://signalpath-api.onrender.com/) |
+| API health | Render | [Check health](https://signalpath-api.onrender.com/api/health) |
+| Database | MongoDB Atlas | Managed database |
+
+The frontend uses `VITE_API_BASE_URL` to identify the backend API. The backend uses `MONGODB_URI` for database connectivity and `CLIENT_ORIGIN` to configure permitted browser origins.
+
+## Getting Started Locally
+
+### Prerequisites
+
+- Node.js 20 or later
+- npm
+- MongoDB running locally or a MongoDB Atlas database
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/pooj2123/signalpath-analytics.git
+cd signalpath-analytics/causalfunnel-analytics
+```
+
+### 2. Configure the backend
+
 ```bash
 cd server
 npm install
+cp .env.example .env
+```
+
+Edit `server/.env` with your local settings:
+
+```env
+PORT=4000
+MONGODB_URI=mongodb://127.0.0.1:27017/signalpath
+CLIENT_ORIGIN=http://localhost:5173
+RATE_LIMIT_MAX=300
+```
+
+The example URI assumes MongoDB is running locally. For MongoDB Atlas, use your own connection string.
+
+**Never commit your real `.env` file, database password, or connection URI to GitHub.**
+
+### 3. Start the backend
+
+From the `server` directory:
+
+```bash
 npm run dev
 ```
-The API runs at `http://localhost:4000`.
 
-### 3. Install and start the dashboard
-Open a second terminal:
+The API should run at `http://localhost:4000`.
+
+Check its health at `http://localhost:4000/api/health`.
+
+### 4. Start the frontend
+
+Open a second terminal from the `causalfunnel-analytics` directory:
+
 ```bash
 cd client
 npm install
 npm run dev
 ```
-The dashboard runs at `http://localhost:5173`. Vite proxies `/api` requests to the API.
 
-### 4. Generate analytics
-Open `http://localhost:5173/demo` and interact with the demo page. Then return to `/` to view sessions and click heatmap data.
+The Vite development server should run at `http://localhost:5173`.
 
-## API
-| Method | Endpoint | Purpose |
+If the development proxy is configured, frontend API requests can be routed to the backend on port 4000.
+
+### 5. Generate analytics
+
+1. Open `http://localhost:5173/demo`.
+2. Interact with the demo storefront.
+3. Return to the dashboard.
+4. Explore recorded sessions, user journeys, and click heatmap data.
+
+Events appear only when tracking requests succeed and the backend can persist them.
+
+## REST API Reference
+
+| Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/health` | API/database health |
-| `POST` | `/api/events` | Ingest one event or `{ events: [...] }` |
-| `GET` | `/api/sessions` | Sessions with counts and activity |
-| `GET` | `/api/sessions/:sessionId/events` | Chronological event journey |
-| `GET` | `/api/heatmap/pages` | Distinct pages with click events |
-| `GET` | `/api/heatmap/clicks?url=...` | Click coordinates for a page |
+| `GET` | `/api/health` | Reports API and database health |
+| `POST` | `/api/events` | Ingests an event or a batch of events |
+| `GET` | `/api/sessions` | Retrieves session summaries and activity counts |
+| `GET` | `/api/sessions/:sessionId/events` | Retrieves a session's chronological event journey |
+| `GET` | `/api/heatmap/pages` | Lists pages with recorded click events |
+| `GET` | `/api/heatmap/clicks?url=...` | Retrieves click coordinates for a page |
 
-## Tracking on another webpage
-Include the script on the page:
+## Tracking Another Webpage
+
+For local development, include the tracking script in a webpage:
+
 ```html
 <script
   src="http://localhost:4000/tracker.js"
@@ -75,42 +183,108 @@ Include the script on the page:
   defer
 ></script>
 ```
-The server serves the tracker at `/tracker.js`. The tracker records a page view and click coordinates relative to the viewport. For a production deployment, serve the tracker and tracked page over HTTPS and configure the API's `CLIENT_ORIGIN` to the dashboard/site origins.
+
+The backend serves the tracking script at `/tracker.js`.
+
+For a deployed webpage, use the HTTPS URL of the deployed tracker and API. Configure `CLIENT_ORIGIN` to allow the relevant website origin.
 
 ## Configuration
-See `server/.env.example`:
-- `PORT`: API port (default `4000`)
-- `MONGODB_URI`: MongoDB connection string
-- `CLIENT_ORIGIN`: comma-separated allowed browser origins
-- `RATE_LIMIT_MAX`: max requests per 15-minute window
 
-## Data model
+| Variable | Description | Default |
+|---|---|---|
+| `PORT` | API server port | `4000` |
+| `MONGODB_URI` | MongoDB connection string | Local MongoDB fallback |
+| `CLIENT_ORIGIN` | Comma-separated list of allowed browser origins | `http://localhost:5173` |
+| `RATE_LIMIT_MAX` | Request limit per 15-minute window | `300` |
+| `VITE_API_BASE_URL` | Frontend's backend API base URL | Configured for the frontend environment |
+
+Configure production values in the hosting platform's environment settings rather than hardcoding credentials in source files.
+
+## Data Model
+
 Each event document contains:
-- `sessionId` (indexed)
-- `type` (`page_view` or `click`)
-- `pageUrl`
-- `timestamp`
-- optional `coordinates: { x, y }`
-- optional `viewport: { width, height }`
 
-Timestamps are supplied by the client but validated; the API normalizes them to ISO dates. Coordinates are viewport-relative, which keeps the visualization simple and consistent.
+- `sessionId` — browser session identifier
+- `type` — event type, such as `page_view` or `click`
+- `pageUrl` — URL associated with the event
+- `timestamp` — validated event timestamp
+- `coordinates` — optional click coordinates `{ x, y }`
+- `viewport` — optional viewport dimensions `{ width, height }`
 
-## Assumptions and trade-offs
-- A session persists in the same browser until local storage is cleared; this is a lightweight session identity, not authenticated identity.
-- The heatmap uses viewport-relative pixel coordinates and shows a normalized percentage overlay. It is a visual aid, not a DOM-aware or scroll-position-aware heatmap.
-- No user-identifying form data or keystrokes are collected.
-- The demo is intended for evaluation and local development. Before public production deployment, add authentication/authorization for the dashboard, retention controls, consent handling appropriate to the deployment jurisdiction, and a managed database with backups.
-- MongoDB indexes support the most common session and page queries. Aggregation pipelines calculate session counts server-side.
+The API validates client-supplied timestamps and normalizes them to ISO dates. Coordinates are viewport-relative, providing a simple basis for click visualization.
 
-## Project structure
+## Design Decisions and Trade-offs
+
+- **Lightweight session identity:** Sessions are associated with a browser using local storage and a cookie fallback, rather than authenticated user identity.
+- **Viewport-relative coordinates:** The heatmap uses viewport-relative click positions and is not DOM-aware or scroll-position-normalized.
+- **Privacy-conscious tracking:** The tracker does not collect form contents or keystrokes.
+- **Server-side analytics:** MongoDB indexes and aggregation pipelines support common session and page queries.
+- **Modular architecture:** Tracking, API routes, persistence, and dashboard rendering are separated to keep the implementation understandable.
+
+## Project Structure
+
 ```text
 causalfunnel-analytics/
-├── client/                 # React dashboard and demo page
-└── server/                 # Express API, MongoDB model, tracker script
+├── client/
+│   ├── public/
+│   ├── src/
+│   ├── package.json
+│   └── vite.config.ts
+├── server/
+│   ├── public/
+│   ├── src/
+│   ├── package.json
+│   └── .env.example
+├── .gitignore
+├── README.md
+└── render.yaml
 ```
 
+## Security and Limitations
+
+SignalPath is an assignment and demonstration project, not a fully hardened production analytics service.
+
+Before broader production use, consider adding:
+
+- Authentication and authorization for dashboard access
+- Consent handling and privacy controls appropriate to the deployment
+- Configurable event retention and deletion policies
+- Database backups and recovery procedures
+- Automated testing and additional operational monitoring
+- Improved heatmap normalization for scrolling and varying viewport sizes
+
+The application uses environment variables for database credentials, CORS restrictions for browser origins, and rate limiting to mitigate some common risks. These controls do not replace a comprehensive production security review.
+
 ## Troubleshooting
-- **MongoDB connection fails:** verify `MONGODB_URI`, database user/password, Atlas IP allow-list, and network access.
-- **Dashboard says API unavailable:** start the API on port 4000 and check `GET /api/health`.
-- **No sessions appear:** visit `/demo` and click around. Events are only stored when MongoDB is connected.
-- **CORS errors:** add the exact origin(s), including scheme and port, to `CLIENT_ORIGIN`.
+
+### MongoDB connection fails
+
+- Verify `MONGODB_URI`.
+- Check the database username and password.
+- Confirm MongoDB Atlas network access rules permit the backend to connect.
+- Review Render logs for connection errors.
+
+### Dashboard reports that the API is unavailable
+
+- Check the [API health endpoint](https://signalpath-api.onrender.com/api/health).
+- Verify `VITE_API_BASE_URL`.
+- Check the backend's `CLIENT_ORIGIN` configuration and browser console for CORS errors.
+
+### No sessions appear
+
+- Open the demo storefront and interact with it.
+- Confirm that the event ingestion request succeeds.
+- Verify that MongoDB is connected and events are being persisted.
+
+### CORS errors occur
+
+- Add the exact permitted origin, including the scheme and hostname, to `CLIENT_ORIGIN`.
+- Save the environment variable and restart or redeploy the backend.
+
+---
+
+**Project:** SignalPath — User Behavior Analytics Platform  
+**Live Demo:** [signalpath-analytics.vercel.app](https://signalpath-analytics.vercel.app/)  
+**Source Code:** [github.com/pooj2123/signalpath-analytics](https://github.com/pooj2123/signalpath-analytics)
+
+Built to demonstrate full-stack engineering across browser tracking, REST API development, database persistence, analytics visualization, and cloud deployment.
